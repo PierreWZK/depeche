@@ -38,13 +38,15 @@ export function DailyGame({ day, pairs }: { day: string; pairs: DuelPair[] | nul
   const [shown, setShown] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Lecture du navigateur après le premier rendu : le HTML serveur et le premier rendu client restent identiques.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setSaved(loadSaved()), []);
 
   if (!pairs || pairs.length < ROUNDS) {
     return (
       <div className="flex flex-col gap-4">
         <GameHeader />
-        <p className="font-body text-lg text-ink/75">Le jeu n'est pas disponible aujourd'hui. Les articles restent à lire.</p>
+        <p className="font-body text-lg text-ink/75">Le jeu n’est pas disponible aujourd’hui. Les articles restent à lire.</p>
       </div>
     );
   }

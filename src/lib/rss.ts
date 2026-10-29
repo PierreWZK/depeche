@@ -60,12 +60,14 @@ function httpUrl(candidate: string | null): string | null {
   }
 }
 
-function findImage(block: string, html: string): string | null {
+// Cherche dans tout l'article, pas seulement l'extrait : The Verge met l'image dans <content>, après <summary>.
+function findImage(block: string): string | null {
+  const html = decodeEntities(unwrapCdata(block));
   const candidates = [
     tagAttr(block, "media:content", "url"),
     tagAttr(block, "media:thumbnail", "url"),
     tagAttr(block, "enclosure", "url"),
-    html.match(/<img[^>]+src="([^"]+)"/i)?.[1] ?? null,
+    html.match(/<img\s[^>]*?\bsrc=["']([^"']+)["']/i)?.[1] ?? null,
   ];
   for (const candidate of candidates) {
     const url = httpUrl(candidate);
@@ -95,7 +97,7 @@ function parseBlock(block: string): FeedItem | null {
     title,
     url,
     excerpt: excerpt.length > 280 ? `${excerpt.slice(0, 280).trimEnd()}…` : excerpt,
-    image: findImage(block, html),
+    image: findImage(block),
     date: parseDate(block),
   };
 }
