@@ -1,0 +1,17 @@
+# dépendances et build
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
+
+# environnement
+.env
+.env.*
+!.env.example
+
+# outils locaux
+.impeccable/
+
+# système
+.DS_Store
+Thumbs.db

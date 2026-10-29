@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Encre de presse : noir encre, papier crème, rouge « breaking ». */
+@theme inline {
+  --color-ink: #0c0c0b;
+  --color-paper: #f2ecdf;
+  --color-paper-deep: #e6dccb;
+  --color-rust: #e4002b;
+  --color-mute: #6b6558;
+  --font-display: var(--f-display);
+  --font-body: var(--f-body);
+  --font-mono: var(--f-mono);
+}
+
+/* Bordure qui tourne (inspiré de Moving Border, Aceternity UI). */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.moving-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.moving-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--border-angle), transparent 60%, var(--color-rust), transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: border-spin 4s linear infinite;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+/* Mots qui apparaissent un à un (inspiré de Text Generate, Aceternity UI). */
+.word-in {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.3em);
+  animation: word-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+@keyframes word-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moving-border::before,
+  .word-in {
+    animation: none;
+  }
+  .word-in {
+    opacity: 1;
+    transform: none;
+  }
+}
