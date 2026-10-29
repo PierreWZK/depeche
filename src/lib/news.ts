@@ -2,6 +2,7 @@ import { cacheLife } from "next/cache";
 import { sources, type Source } from "@/config/sources";
 import { parseFeed, type FeedItem } from "@/lib/rss";
 import { dedupe } from "@/lib/dedupe";
+import { assignFallbacks } from "@/lib/images";
 
 export const REVALIDATE_SECONDS = 15 * 60;
 
@@ -10,7 +11,8 @@ export type Article = FeedItem & {
 };
 
 // Un même sujet vu par plusieurs sources : une carte, et les autres sources listées dans alsoIn.
-export type Story = Article & { alsoIn: string[] };
+// fallback : photo de repli du thème, si l'image du flux manque ou ne charge pas.
+export type Story = Article & { alsoIn: string[]; fallback?: string };
 
 async function fetchSource(source: Source): Promise<Article[]> {
   const response = await fetch(source.url, {
@@ -46,5 +48,5 @@ export async function getArticles(): Promise<{ articles: Story[]; failed: string
   });
 
   articles.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  return { articles: dedupe(articles), failed };
+  return { articles: assignFallbacks(dedupe(articles)), failed };
 }

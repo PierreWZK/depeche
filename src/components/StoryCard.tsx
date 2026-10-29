@@ -1,7 +1,7 @@
 "use client";
 
 import type { Story } from "@/lib/news";
-import { THEME_LABELS, formatDate } from "./format";
+import { THEME_LABELS, fallbackOnError, formatDate, imageFor } from "./format";
 
 type Props = {
   story: Story;
@@ -31,20 +31,18 @@ export function StoryCard({ story, large, compact, read, later, onRead, onLater 
 
   return (
     <li className={`group flex flex-col border border-ink bg-paper ${large ? "md:col-span-2 md:row-span-2" : ""} ${read ? "opacity-55" : ""}`}>
-      {story.image ? (
-        // eslint-disable-next-line @next/next/no-img-element -- images externes des flux, déjà validées en http(s)
+      {/* Doublon du lien du titre pour la souris : caché aux lecteurs d'écran et au clavier. */}
+      <a href={story.url} target="_blank" rel="noopener noreferrer" onClick={onRead} tabIndex={-1} aria-hidden className="block overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element -- images externes des flux, déjà validées en http(s) */}
         <img
-          src={story.image}
+          src={imageFor(story)}
           alt=""
           loading="lazy"
           referrerPolicy="no-referrer"
-          className={`w-full object-cover grayscale transition duration-500 group-hover:grayscale-0 ${large ? "aspect-[16/9]" : "aspect-[3/2]"}`}
+          onError={fallbackOnError(story)}
+          className={`w-full object-cover grayscale transition duration-500 group-hover:scale-[1.02] group-hover:grayscale-0 ${large ? "aspect-[16/9]" : "aspect-[3/2]"}`}
         />
-      ) : (
-        <div className={`flex items-end bg-ink p-4 ${large ? "aspect-[16/9]" : "aspect-[3/2]"}`}>
-          <span className="font-display text-6xl leading-none text-paper/90">{story.source.name.slice(0, 2).toUpperCase()}</span>
-        </div>
-      )}
+      </a>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <p className="font-mono text-[11px] uppercase tracking-wider text-mute">{meta}</p>
         <a href={story.url} target="_blank" rel="noopener noreferrer" onClick={onRead} className={`font-body leading-tight hover:underline ${large ? "text-3xl md:text-4xl" : "text-xl"}`}>

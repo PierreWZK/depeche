@@ -9,6 +9,7 @@ export function useStoredSet(key: string): [Set<string>, (id: string) => void] {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(key);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture du navigateur après l'hydratation, voulue
       if (saved) setItems(new Set(JSON.parse(saved) as string[]));
     } catch {
       // Stockage indisponible (navigation privée, données bloquées) : on repart de zéro.

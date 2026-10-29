@@ -1,14 +1,17 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import Link from "next/link";
+import type { MouseEvent, RefObject } from "react";
 import type { Story } from "@/lib/news";
-import { formatDate } from "./format";
+import { fallbackOnError, formatDate, imageFor } from "./format";
 
 type Props = {
   featured: Story | undefined;
   query: string;
   onQuery: (value: string) => void;
   today: string;
+  savedCount: number;
+  searchRef: RefObject<HTMLLabelElement | null>;
 };
 
 const TAGLINE = "L'actu dev et gaming, sans le bruit.";
@@ -20,7 +23,7 @@ function moveSpotlight(event: MouseEvent<HTMLElement>) {
   event.currentTarget.style.setProperty("--sy", `${event.clientY - rect.top}px`);
 }
 
-export function Hero({ featured, query, onQuery, today }: Props) {
+export function Hero({ featured, query, onQuery, today, savedCount, searchRef }: Props) {
   return (
     <header
       onMouseMove={moveSpotlight}
@@ -34,7 +37,12 @@ export function Hero({ featured, query, onQuery, today }: Props) {
           <span className="inline-block h-2 w-2 bg-rust" aria-hidden />
           Édition du jour
         </span>
-        <span>{today}</span>
+        <span className="flex items-center gap-4">
+          <span className="hidden sm:inline">{today}</span>
+          <Link href="/a-lire" className="border border-paper/40 px-2 py-1 text-paper hover:bg-paper hover:text-ink">
+            À lire · {savedCount}
+          </Link>
+        </span>
       </div>
 
       <div className="px-4 pb-10 pt-16 md:px-10 md:pt-24">
@@ -49,7 +57,7 @@ export function Hero({ featured, query, onQuery, today }: Props) {
           ))}
         </p>
 
-        <label className="mt-8 flex max-w-xl items-center gap-3 border-b-2 border-paper pb-2">
+        <label ref={searchRef} className="mt-8 flex max-w-xl items-center gap-3 border-b-2 border-paper pb-2">
           <span className="font-mono text-xs uppercase tracking-widest text-paper/70">Chercher</span>
           <input
             type="search"
@@ -66,28 +74,25 @@ export function Hero({ featured, query, onQuery, today }: Props) {
           href={featured.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group grid border-t border-paper/20 md:grid-cols-[1.4fr_1fr]"
+          className="group grid border-t border-paper/20 md:grid-cols-[1.2fr_1fr]"
         >
-          <div className="relative aspect-[16/9] overflow-hidden bg-paper/5 md:aspect-auto">
-            {featured.image ? (
-              // eslint-disable-next-line @next/next/no-img-element -- image externe d'un flux, URL validée
-              <img
-                src={featured.image}
-                alt=""
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-[1.02] group-hover:opacity-100"
-              />
-            ) : (
-              <div className="flex h-full min-h-48 items-end bg-rust p-6">
-                <span className="font-display text-7xl leading-none md:text-9xl">UNE</span>
-              </div>
-            )}
+          {/* Hauteur bornée : l'image ne dicte plus la taille du bloc, quelle que soit sa taille d'origine. */}
+          <div className="relative aspect-[16/10] overflow-hidden bg-paper/5 md:aspect-auto md:h-[min(26rem,40vw)]">
+            {/* eslint-disable-next-line @next/next/no-img-element -- image externe d'un flux, URL validée */}
+            <img
+              src={imageFor(featured)}
+              alt=""
+              referrerPolicy="no-referrer"
+              onError={fallbackOnError(featured)}
+              className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-[1.02] group-hover:opacity-100"
+            />
           </div>
           <div className="flex flex-col justify-end gap-4 p-4 md:p-8">
             <span className="inline-flex w-fit items-center gap-2 bg-rust px-2 py-1 font-mono text-xs uppercase tracking-widest">
               À la une
             </span>
             <h2 className="font-body text-3xl leading-tight group-hover:underline md:text-4xl">{featured.title}</h2>
+            {featured.excerpt && <p className="line-clamp-3 font-body text-lg text-paper/70">{featured.excerpt}</p>}
             <p className="font-mono text-xs uppercase tracking-wider text-paper/60">
               {featured.source.name} · {formatDate(featured.date)}
             </p>

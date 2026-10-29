@@ -49,6 +49,19 @@ test("parseFeed lit un flux Atom avec lien href et média", () => {
   assert.equal(item.date, "2026-10-27T08:00:00.000Z");
 });
 
+test("parseFeed trouve l'image dans <content> quand <summary> n'en a pas (The Verge)", () => {
+  const xml = `<feed><entry>
+    <title>Verge</title>
+    <link rel="alternate" href="https://example.com/verge"/>
+    <summary type="html">Court résumé</summary>
+    <content type="html">&lt;figure&gt;&lt;img alt="x" src="https://example.com/v.jpg?w=1200&amp;q=80" /&gt;&lt;/figure&gt;</content>
+  </entry></feed>`;
+
+  const [item] = parseFeed(xml);
+  assert.equal(item.excerpt, "Court résumé");
+  assert.equal(item.image, "https://example.com/v.jpg?w=1200&q=80");
+});
+
 test("parseFeed écarte les liens non http et les articles sans titre", () => {
   const xml = `<rss>
     <item><title>Dangereux</title><link>javascript:alert(1)</link></item>
